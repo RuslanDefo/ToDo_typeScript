@@ -296,7 +296,7 @@ export default class TodoListView {
     span.classList.add('counter');
     const unCompletedArray: ITodoItem[] = todos.filter((todo) => !todo.checked);
     const completedArray: ITodoItem[] = todos.filter((todo) => todo.checked);
-    span.insertAdjacentText('afterbegin', String(unCompletedArray.length) + ' items left');
+    span.insertAdjacentText('afterbegin', String(unCompletedArray.length) + ' tasks in list');
 
     const div = document.createElement('div');
     div.classList.add('filters');
