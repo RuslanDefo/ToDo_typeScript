@@ -130,6 +130,7 @@ export default class TodoListView {
 
     const backdrop = document.createElement('div');
     backdrop.classList.add('backdrop');
+    backdrop.id = 'gotIt';
 
     const textField = document.createElement('div');
     textField.classList.add('text-field');
@@ -144,12 +145,13 @@ export default class TodoListView {
     modal.appendChild(backdrop);
 
     return new Promise((resolve) => {
-      const clearModal = (e: KeyboardEvent) => {
+      const clearModal = async (e: KeyboardEvent) => {
         if (e.code === KeyboardKeys.ENTER_KEY) {
-          modal.replaceChildren();
+          await modal.replaceChildren();
           document.removeEventListener('keydown', clearModal);
           if (id) {
             resolve(id);
+            this._clearApp();
           } else {
             resolve(Infinity);
           }
@@ -162,6 +164,7 @@ export default class TodoListView {
         }
       };
 
+      console.log(event.target);
       document.addEventListener('keydown', clearModal);
     });
   }
@@ -217,11 +220,12 @@ export default class TodoListView {
         {
           eventName: 'click',
           callback: () => {
-            this._createDeleteModal('Delete this task?', todo.id).then((todoId) => {
+            this._createDeleteModal(`Delete this task?  ${todo.text}`, todo.id).then((todoId) => {
               if (todoId) {
                 this.handlers.onDelete(<number>todoId);
               }
             });
+            // .then(() => this._clearApp());
           }
         }
       ]

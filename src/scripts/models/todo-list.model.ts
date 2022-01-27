@@ -1,53 +1,34 @@
-import { ITodoItem } from '../types';
+import { adress, ITodoItem } from '../types';
 
 export default class TodoListModel {
   currentInputValue = '';
 
   todoList: ITodoItem[] = JSON.parse(localStorage.getItem('todoList')) || [];
 
-  create(text: string) {
-    const todo: ITodoItem = {
-      id: Math.floor(Math.random() * 100000),
-      text,
-      checked: false
-    };
-    this.todoList.push(todo);
-    this.setLocalStorage();
+  async request(method = 'GET', adressLink: string = adress.ref, key: any = null, value: string | boolean) {
+    if (method == 'GET') {
+      const response = await fetch(adressLink);
+      const data = await response.json();
+      this.todoList = [...data];
+      return localStorage.setItem('todoList', JSON.stringify(this.todoList));
+    }
+    // eslint-disable-next-line no-constant-condition
+    if (method === 'POST' || 'PUT' || 'DELETE') {
+      const response = await fetch(adressLink, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ [key]: value })
+      });
+      const data = await response.json();
+      this.todoList = [...data];
+      return localStorage.setItem('todoList', JSON.stringify(this.todoList));
+    }
   }
 
-  changeText(id: number, text: string) {
-    this.todoList = this.todoList.map((todo) => {
-      if (todo.id === id) {
-        return { id: todo.id, text: text, checked: todo.checked };
-      } else {
-        return todo;
-      }
-    });
-    this.setLocalStorage();
-  }
-
-  toggle(id: number) {
-    this.todoList = this.todoList.map((todo) => {
-      if (todo.id === id) {
-        return { id: todo.id, text: todo.text, checked: !todo.checked };
-      } else {
-        return todo;
-      }
-    });
-    this.setLocalStorage();
-  }
-
-  delete(id: number) {
-    this.todoList = this.todoList.filter((todo) => todo.id !== id);
-    this.setLocalStorage();
-  }
-
-  deleteCompleted() {
-    this.todoList = this.todoList.filter((todo) => !todo.checked);
-    this.setLocalStorage();
-  }
-
-  setLocalStorage() {
-    localStorage.setItem('todoList', JSON.stringify(this.todoList));
+  init() {
+    // @ts-ignore
+    this.request();
   }
 }
