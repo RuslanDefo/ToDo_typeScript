@@ -1,53 +1,66 @@
-import { ITodoItem } from '../types';
+import { adress, ITodoItem } from '../types';
 
 export default class TodoListModel {
   currentInputValue = '';
 
   todoList: ITodoItem[] = JSON.parse(localStorage.getItem('todoList')) || [];
 
-  create(text: string) {
-    const todo: ITodoItem = {
-      id: Math.floor(Math.random() * 100000),
-      text,
-      checked: false
-    };
-    this.todoList.push(todo);
-    this.setLocalStorage();
+  async getAll() {
+    const response = await fetch(adress.ref, {
+      method: 'GET'
+    });
+    const data = await response.json();
+    this.todoList = [...data];
+    return localStorage.setItem('todoList', JSON.stringify(this.todoList));
   }
 
-  changeText(id: number, text: string) {
-    this.todoList = this.todoList.map((todo) => {
-      if (todo.id === id) {
-        return { id: todo.id, text: text, checked: todo.checked };
-      } else {
-        return todo;
+  async createTask(key: string = null, value: string | boolean) {
+    const response = await fetch(adress.ref, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({ [key]: value })
+    });
+    const data = await response.json();
+    this.todoList = [...data];
+    return localStorage.setItem('todoList', JSON.stringify(this.todoList));
+  }
+
+  async editTask(id: number, key: string = null, value: string | boolean) {
+    const response = await fetch(adress.ref + `${id.toString()}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({ [key]: value })
+    });
+    const data = await response.json();
+    this.todoList = [...data];
+    return localStorage.setItem('todoList', JSON.stringify(this.todoList));
+  }
+
+  async deleteTask(id: number) {
+    const response = await fetch(adress.ref + `${id.toString()}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
       }
     });
-    this.setLocalStorage();
+    const data = await response.json();
+    this.todoList = [...data];
+    return localStorage.setItem('todoList', JSON.stringify(this.todoList));
   }
 
-  toggle(id: number) {
-    this.todoList = this.todoList.map((todo) => {
-      if (todo.id === id) {
-        return { id: todo.id, text: todo.text, checked: !todo.checked };
-      } else {
-        return todo;
+  async deleteCompleted(checker: string) {
+    const response = await fetch(adress.ref + checker, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
       }
     });
-    this.setLocalStorage();
-  }
-
-  delete(id: number) {
-    this.todoList = this.todoList.filter((todo) => todo.id !== id);
-    this.setLocalStorage();
-  }
-
-  deleteCompleted() {
-    this.todoList = this.todoList.filter((todo) => !todo.checked);
-    this.setLocalStorage();
-  }
-
-  setLocalStorage() {
-    localStorage.setItem('todoList', JSON.stringify(this.todoList));
+    const data = await response.json();
+    this.todoList = [...data];
+    return localStorage.setItem('todoList', JSON.stringify(this.todoList));
   }
 }

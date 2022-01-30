@@ -1,5 +1,5 @@
 import TodoListModel from '../models/todo-list.model';
-import { Filters } from '../types';
+import { Filters, adress } from '../types';
 import TodoListView from '../views/todo-list.view';
 
 export default class TodoListController {
@@ -18,7 +18,9 @@ export default class TodoListController {
   }
 
   init(): void {
-    this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue);
+    this._todoListModel
+      .getAll()
+      .then(() => this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue));
   }
 
   actionInput(value: string): void {
@@ -29,32 +31,35 @@ export default class TodoListController {
     const text = this._todoListModel.currentInputValue.trim();
 
     if (text) {
-      this._todoListModel.create(text);
-      this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue);
+      this._todoListModel
+        .createTask('text', text)
+        .then(() => this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue));
     }
   }
 
   actionChange(id: number, text: string): void {
-    this._todoListModel.changeText(id, text);
-
-    this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue);
+    this._todoListModel
+      .editTask(id, 'text', text)
+      .then(() => this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue));
   }
 
   actionToggle(id: number): void {
-    this._todoListModel.toggle(id);
-
-    this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue);
+    const todo = this._todoListModel.todoList.find((todo) => todo.id === id);
+    this._todoListModel
+      .editTask(id, 'checked', !todo.checked)
+      .then(() => this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue));
   }
 
   actionDelete(id: number): void {
-    this._todoListModel.delete(id);
-
-    this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue);
+    this._todoListModel
+      .deleteTask(id)
+      .then(() => this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue));
   }
 
   actionDeleteCompleted(): void {
-    this._todoListModel.deleteCompleted();
-    this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue);
+    this._todoListModel
+      .deleteCompleted('0')
+      .then(() => this._todoListView.render(this._todoListModel.todoList, this.currentFilterValue));
   }
 
   actionChangeFilter(value: Filters) {

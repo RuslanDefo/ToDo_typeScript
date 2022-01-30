@@ -29,3 +29,7 @@ export enum Filters {
   COMPLETED = 'completed',
   ACTIVE = 'active'
 }
+
+export enum adress {
+  ref = 'http://localhost:8080/api/v1/'
+}
